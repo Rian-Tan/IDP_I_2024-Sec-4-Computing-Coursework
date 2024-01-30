@@ -43,17 +43,29 @@ def overlay_sunglasses(face_image, sunglasses_image, landmarks):
     sunglasses_width = int(np.linalg.norm(right_eye[0] - left_eye[3]))
 
     # Resize sunglasses image to match the calculated width
-    sunglasses_resized = cv2.resize(sunglasses_image, (sunglasses_width, int(sunglasses_width / sunglasses_image.shape[1] * sunglasses_image.shape[0])))
+    sunglasses_resized = cv2.resize(sunglasses_image, (sunglasses_width*2, int(sunglasses_width / sunglasses_image.shape[1] * sunglasses_image.shape[0])*2))
 
     # Calculate the position to overlay sunglasses on the face
     x_offset = left_eye[0][0]
     y_offset = int((left_eye[0][1] + right_eye[3][1]) / 2) - int(sunglasses_resized.shape[0] / 2)
 
-    # Overlay sunglasses on the face
+    # Calculate the angle of rotation
+    angle = np.arctan2(right_eye[3][1] - left_eye[0][1], right_eye[3][0] - left_eye[0][0]) * 180 / np.pi
+
+    # Rotate sunglasses image in the opposite direction
+    rotation_matrix = cv2.getRotationMatrix2D((sunglasses_resized.shape[1] // 2, sunglasses_resized.shape[0] // 2), -angle, 1)
+    rotated_sunglasses = cv2.warpAffine(sunglasses_resized, rotation_matrix, (sunglasses_resized.shape[1], sunglasses_resized.shape[0]))
+
+
+
+
+
+
+    # Overlay rotated sunglasses on the face
     for c in range(0, 3):
-        face_image[y_offset:y_offset + sunglasses_resized.shape[0], x_offset:x_offset + sunglasses_resized.shape[1], c] = \
-            sunglasses_resized[:, :, c] * (sunglasses_resized[:, :, 3] / 255.0) + \
-            face_image[y_offset:y_offset + sunglasses_resized.shape[0], x_offset:x_offset + sunglasses_resized.shape[1], c] * (1.0 - sunglasses_resized[:, :, 3] / 255.0)
+        face_image[y_offset:y_offset + rotated_sunglasses.shape[0], x_offset:x_offset + rotated_sunglasses.shape[1], c] = \
+            rotated_sunglasses[:, :, c] * (rotated_sunglasses[:, :, 3] / 255.0) + \
+            face_image[y_offset:y_offset + rotated_sunglasses.shape[0], x_offset:x_offset + rotated_sunglasses.shape[1], c] * (1.0 - rotated_sunglasses[:, :, 3] / 255.0)
 
     return face_image
 
