@@ -25,6 +25,9 @@ sstinc = cv2.imread('./images/11_sstinc.png', -1)
 sst_infineon = cv2.imread('./images/12_SST-infineon.png', -1)
 sstsmu = cv2.imread('./images/13_sstsmu.png', -1)
 pforssst = cv2.imread('./images/14_pforssst.png', -1)
+top_hat = cv2.imread('./images/15_hat.png', -1)
+partyhat = cv2.imread('./images/16_partyhat.png',-1)
+
 
 
 def overlay_image(face_image, overlay, landmarks):
@@ -136,6 +139,8 @@ print("[11] SST Inc Hoodie")
 print("[12] SST - Infineon partnership Hoodie")
 print("[13] SST - SMU partnership Hoodie")
 print("[14] PforSST Hoodie")
+print("[15] Top Hat")
+print("[16] Party Hat")
 print("Enter 0 to confirm your choices")
 
 
@@ -155,13 +160,15 @@ selection = [
     "SST Inc Hoodie",
     "SST - Infineon partnership Hoodie",
     "SST - SMU partnership Hoodie",
-    "PforSST Hoodie"
+    "PforSST Hoodie",
+    "Top Hat",
+    "Party Hat",
 ]
 
 while True:
     try: # exception if choice is not a number
         choice = int(input("> ")) #cursors are cool
-        if 0 <= choice <=14: #exception if choice is out of range 
+        if 0 <= choice <=16: #exception if choice is out of range 
             if choice != 0:
                 choices.append(choice) 
             else:
@@ -214,8 +221,12 @@ while True:
                 image = overlay_image(image, sst_infineon, shape)
             if choices.__contains__(13): # E
                 image = overlay_image(image, sstsmu, shape)
-            if choices.__contains__(14): # statements
+            if choices.__contains__(14):
                 image = overlay_image(image, pforssst, shape)
+            if choices.__contains__(15): # statements
+                image = overlay_image(image, top_hat, shape)
+            if choices.__contains__(16): # !!
+                image = overlay_image(image, partyhat, shape)
             ''' #ugly green circles for landmarks on face
             for (x, y) in shape:
                 cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
