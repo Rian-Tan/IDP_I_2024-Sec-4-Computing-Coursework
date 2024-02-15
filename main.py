@@ -1,18 +1,26 @@
+# import necessary libraries for facial feature detection and image processing
+#ryan (lines 3-17)
 from imutils import face_utils 
 import dlib
 import cv2
 import numpy as np
 import datetime
 
+# define the path to the pre-trained facial landmark predictor model
 p = "shape_predictor_68_face_landmarks.dat"
+
+# initialize the face detector and shape predictor using the pre-trained models
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(p)
 
+# initialize the video capture object, using the default camera (0) as the video source
 cap = cv2.VideoCapture(0);
 
-# loading assets
+#loading images of facial props from file paths
+#ryan (lines 21-22)
 round_glasses = cv2.imread('./images/01_round_glasses.png', -1)
 rectangular_glasses = cv2.imread('./images/02_rectangular_glasses.png', -1)
+# rian (lines 24-37)
 pridebubble = cv2.imread('./images/03_pridebubble.png', -1)
 stembubble = cv2.imread('./images/04_stembubble.png', -1)
 yesbubble = cv2.imread('./images/05_yesbubble.png', -1)
@@ -28,8 +36,22 @@ pforssst = cv2.imread('./images/14_pforssst.png', -1)
 top_hat = cv2.imread('./images/15_hat.png', -1)
 partyhat = cv2.imread('./images/16_partyhat.png',-1)
 
-
-
+#error handling for loading image files
+#ryan (lines 41-50)
+if (
+    round_glasses is None or rectangular_glasses is None or
+    pridebubble is None or stembubble is None or yesbubble is None or
+    innovationbubble is None or staffpride is None or proudofsst is None or
+    redbluegrey is None or celebrating is None or sstinc is None or
+    sst_infineon is None or sstsmu is None or pforssst is None or
+    top_hat is None or partyhat is None
+):
+    print("Error loading image files. Please check the file paths.")
+    exit()
+    
+    
+#rian (lines 54-94)
+# function to overlay an image on the detected face
 def overlay_image(face_image, overlay, landmarks):
     # landmarks of eyes
     left_eye = landmarks[36:42]
@@ -64,14 +86,14 @@ def overlay_image(face_image, overlay, landmarks):
         #print("Shapes of ROI and rotated sunglasses do not match.") #error got annoying so i removed it ez
         return face_image
 
+    #combine the overlay image with the face image
     for c in range(0, 3):
         roi[:, :, c] = roi[:, :, c] * (1.0 - rotated_overlay[:, :, 3] / 255.0) + rotated_overlay[:, :, c] * (rotated_overlay[:, :, 3] / 255.0)
-
     face_image[y_offset:y_offset + rotated_overlay.shape[0], x_offset:x_offset + rotated_overlay.shape[1]] = roi
 
     return face_image
 
-
+#ryan (lines 97-136)
 def overlay_glasses(face_image, overlay, landmarks): # extra function so i can offset the glasses properly
     # landmarks of eyes
     left_eye = landmarks[36:42]
@@ -101,20 +123,21 @@ def overlay_glasses(face_image, overlay, landmarks): # extra function so i can o
     # calculate the ROI (region of interest) to put the overlay on
     roi = face_image[y_offset:y_offset + rotated_overlay.shape[0], x_offset:x_offset + rotated_overlay.shape[1]]
 
-    # Ensure that the shapes of the ROI and rotated overlay match
+    # ensure that the shapes of the ROI and rotated overlay match
     if roi.shape[0] != rotated_overlay.shape[0] or roi.shape[1] != rotated_overlay.shape[1]:
         #print("Shapes of ROI and rotated sunglasses do not match.") #error got annoying so i removed it ez
         return face_image
-
+    
+    #combine the overlay image with the face image
     for c in range(0, 3):
         roi[:, :, c] = roi[:, :, c] * (1.0 - rotated_overlay[:, :, 3] / 255.0) + rotated_overlay[:, :, c] * (rotated_overlay[:, :, 3] / 255.0)
-
     face_image[y_offset:y_offset + rotated_overlay.shape[0], x_offset:x_offset + rotated_overlay.shape[1]] = roi
 
     return face_image
 
 
 # Fancy UI time !! 
+#rian (lines 141-206)
 print(" ____  _           _        ____              _   _")
 print("|  _ \| |__   ___ | |_ ___ | __ )  ___   ___ | |_| |__")
 print("| |_) | '_ \ / _ \| __/ _ \|  _ \ / _ \ / _ \| __| '_ \ ")
@@ -165,6 +188,7 @@ selection = [
     "Party Hat",
 ]
 
+# continuously prompt the user for input until a valid choice is made
 while True:
     try: # exception if choice is not a number
         choice = int(input("> ")) #cursors are cool
@@ -179,12 +203,19 @@ while True:
         print("Please try entering a valid whole number corresponding to your choice")
 
 # Print selected choices (quality of life is great rn look at this)
-print("You have selected:") 
-for i in range(len(choices)):
-    print(selection[choices[i]-1])
+print("You have selected:")
+#ryan(lines 208-214)
+if not choices:
+    print("No props")
+else:
+    for i in range(len(choices)):
+        print(selection[choices[i]-1])
+#user instructions
+print("Press spacebar to take a photo!\nPress ESC to exit the program.\n")
 
-
+#rian (lines 217-277)
 # Oh god this is gonna be so painful to comment ugh
+#loop for continuous camera capture and image processing
 while True:
         _, image = cap.read() #get image from camera
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) # turn it into greyscale
@@ -240,10 +271,17 @@ while True:
         if k == 27:
             break
         # Taking photos!! I mean is a photo booth so what type of photobooth doesnt take photos like cmon
+        # capture a photo, generate a timestamped filename, and save the image.
         if k == 32:
-            current_time = datetime.datetime.now() #gets current time
-            # fancy name formatting 
-            savedFilename = "picture_"+str(current_time.year)+"_"+str(current_time.month)+"_"+str(current_time.day)+"_"+str(current_time.hour)+"_"+str(current_time.minute)+"_"+str(current_time.second)+".png"
-            cv2.imwrite(savedFilename, image) #saves the image
-            print("Image saved!") 
-            print("Saved as:\t"+ savedFilename)
+            current_time = datetime.datetime.now()
+            # Fancy name formatting with DD/MM/YYYY_HH-MM-SS
+#ryan(lines 279-287)
+            timestamp = current_time.strftime("%d-%m-%Y_%H-%M-%S")
+            savedFilename = "picture_" + timestamp + ".png"
+            cv2.imwrite(savedFilename, image)
+            print("Image saved!")
+            print("Saved as: " + savedFilename)
+
+#resource cleanup
+cap.release()
+cv2.destroyAllWindows()
