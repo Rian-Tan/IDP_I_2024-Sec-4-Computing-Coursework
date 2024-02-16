@@ -147,7 +147,7 @@ print("|_|   |_| |_|\___/ \__\___/|____/ \___/ \___/ \__|_| |_|")
 print("\nPro tip:\nPress ESC to exit the program\nPress SPACE to take a screenshot / photo!\nShow the peace sign for free balloons")
 print(''.join("-" for i in range(100))) #lazy to manually type - out 100 times
 # selection menu
-print("Select the items that you want:")
+print("Select the items you want (enter its corresponding number):")
 print("[1] Round glasses")
 print("[2] Rectangular glasses")
 print("[3] Speech bubble ('SST Pride - Past, Present, Future!')")
