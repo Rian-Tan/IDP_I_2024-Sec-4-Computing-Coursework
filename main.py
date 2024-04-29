@@ -5,6 +5,8 @@ import dlib
 import cv2
 import numpy as np
 import datetime
+import random
+import os
 
 # define the path to the pre-trained facial landmark predictor model
 p = "shape_predictor_68_face_landmarks.dat"
@@ -164,6 +166,7 @@ print("[13] SST - SMU partnership Hoodie")
 print("[14] PforSST Hoodie")
 print("[15] Top Hat")
 print("[16] Party Hat")
+print("[17] Random (Let the program choose a random combination of our curated props for you!)")
 print("Enter 0 to confirm your choices")
 
 
@@ -197,7 +200,7 @@ hats = 0
 while True:
     try: # exception if choice is not a number
         choice = int(input("> ")) #cursors are cool
-        if 0 <= choice <=16: #exception if choice is out of range 
+        if 0 <= choice <=17: #exception if choice is out of range 
             if choice != 0:
                 if choice in [1, 2]:
                     if glasses == 0:
@@ -259,7 +262,13 @@ while True:
                                 break
                             else:
                                 print("Please enter a valid option (y / n)")
-                            
+                if choice == 17:
+                    #random
+                    choices.append(random.randint(1,2)) #glasses
+                    choices.append(random.randint(3,10)) #speeech / thoughts
+                    choices.append(random.randint(11,14)) #hoodies
+                    choices.append(random.randint(15,16)) #hats
+                    break
             else:
                 break
         else:
@@ -350,3 +359,4 @@ while True:
 #resource cleanup
 cap.release()
 cv2.destroyAllWindows()
+os.system("clear")
