@@ -1,6 +1,6 @@
 # import necessary libraries for facial feature detection and image processing
 #ryan (lines 3-17)
-from imutils import face_utils
+from imutils import face_utils 
 import dlib
 import cv2
 import numpy as np
@@ -48,8 +48,8 @@ if (
 ):
     print("Error loading image files. Please check the file paths.")
     exit()
-
-
+    
+    
 #rian (lines 54-94)
 # function to overlay an image on the detected face
 def overlay_image(face_image, overlay, landmarks):
@@ -69,7 +69,7 @@ def overlay_image(face_image, overlay, landmarks):
 
     # position to offset the overlay image
     x_offset = center_x - (overlay_resized.shape[1] // 2)
-    y_offset = center_y - (overlay_resized.shape[0] // 2) + 50
+    y_offset = center_y - (overlay_resized.shape[0] // 2) + 50  
 
     # to calculate the angle of rotation
     angle = np.arctan2(right_eye[3][1] - left_eye[0][1], right_eye[3][0] - left_eye[0][0]) * 180 / np.pi
@@ -127,7 +127,7 @@ def overlay_glasses(face_image, overlay, landmarks): # extra function so i can o
     if roi.shape[0] != rotated_overlay.shape[0] or roi.shape[1] != rotated_overlay.shape[1]:
         #print("Shapes of ROI and rotated sunglasses do not match.") #error got annoying so i removed it ez
         return face_image
-
+    
     #combine the overlay image with the face image
     for c in range(0, 3):
         roi[:, :, c] = roi[:, :, c] * (1.0 - rotated_overlay[:, :, 3] / 255.0) + rotated_overlay[:, :, c] * (rotated_overlay[:, :, 3] / 255.0)
@@ -136,7 +136,7 @@ def overlay_glasses(face_image, overlay, landmarks): # extra function so i can o
     return face_image
 
 
-# Fancy UI time !!
+# Fancy UI time !! 
 #rian (lines 141-206)
 print(" ____  _           _        ____              _   _")
 print("|  _ \| |__   ___ | |_ ___ | __ )  ___   ___ | |_| |__")
@@ -189,12 +189,77 @@ selection = [
 ]
 
 # continuously prompt the user for input until a valid choice is made
+glasses = 0
+speechbubbles =0
+hoodies = 0
+hats = 0
+
 while True:
     try: # exception if choice is not a number
         choice = int(input("> ")) #cursors are cool
-        if 0 <= choice <=16: #exception if choice is out of range
+        if 0 <= choice <=16: #exception if choice is out of range 
             if choice != 0:
-                choices.append(choice)
+                if choice in [1, 2]:
+                    if glasses == 0:
+                        choices.append(choice)
+                        glasses = 1
+                    else:
+                        print("You already have glasses equipped. Multiple glasses will overlap. Are you sure you want to continue? [y/n]")
+                        while True:
+                            yn = input("> ").lower()
+                            if yn in ['y', 'yes']:  
+                                choices.append(choice)
+                                break
+                            elif yn in ['n', 'no']:
+                                break
+                            else:
+                                print("Please enter a valid option (y / n)")
+                if choice in [_ for _ in range(3,10)]:
+                    if speechbubbles == 0:
+                        choices.append(choice)
+                        speechbubbles = 1
+                    else:
+                        print("You already a speechbubble. Multiple speech bubbles will overlap. Are you sure you want to continue? [y/n]")
+                        while True:
+                            yn = input("> ").lower()
+                            if yn in ['y', 'yes']:  
+                                choices.append(choice)
+                                break
+                            elif yn in ['n', 'no']:
+                                break
+                            else:
+                                print("Please enter a valid option (y / n)")
+                if choice in [_ for _ in range(11,15)]:
+                    if hoodies == 0:
+                        choices.append(choice)
+                        hoodies = 1
+                    else:
+                        print("You already have a hoodie. Multiple hoodies will overlap. Are you sure you want to continue? [y/n]")
+                        while True:
+                            yn = input("> ").lower()
+                            if yn in ['y', 'yes']:  
+                                choices.append(choice)
+                                break
+                            elif yn in ['n', 'no']:
+                                break
+                            else:
+                                print("Please enter a valid option (y / n)")
+                if choice in [_ for _ in range(15,17)]:
+                    if hats == 0:
+                        choices.append(choice)
+                        hats = 1
+                    else:
+                        print("You already have a hat. Multiple hats will overlap. Are you sure you want to continue? [y/n]")
+                        while True:
+                            yn = input("> ").lower()
+                            if yn in ['y', 'yes']:  
+                                choices.append(choice)
+                                break
+                            elif yn in ['n', 'no']:
+                                break
+                            else:
+                                print("Please enter a valid option (y / n)")
+                            
             else:
                 break
         else:
@@ -216,282 +281,56 @@ print("Press spacebar to take a photo!\nPress ESC to exit the program.\n")
 #rian (lines 217-277)
 # Oh god this is gonna be so painful to comment ugh
 #loop for continuous camera capture and image processing
-glasses, hats, speechbubbles, hoodies = 0
 while True:
         _, image = cap.read() #get image from camera
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) # turn it into greyscale
         rects = detector(gray, 0) # detect face
         for (i, rect) in enumerate(rects): #finding landmarks
             # convert shape to numpy array
-            shape = predictor(gray, rect)
-            image = overlay_image(image, yesbubble, shape)
+            shape = predictor(gray, rect) 
             shape = face_utils.shape_to_np(shape)
             # highly efficient algorithm to display only the things you selected
             # Assuming choices is a list of integers representing the selected options
             if choices.__contains__(1): # I
-                if glasses == 0:
-                    image = overlay_glasses(image, round_glasses, shape)
-                    glasses = 1
-                else:
-                    print("You already have glasses equipped, are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_glasses(image, round_glasses, shape)
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_glasses(image, round_glasses, shape)
             if choices.__contains__(2): # L
-                if glasses == 0:
-                    image = overlay_glasses(image, rectangular_glasses, shape)
-                    glasses = 1
-                else:
-                    print("You already have glasses equipped. The glasses will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_glasses(image, rectangular_glasses, shape)
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_glasses(image, rectangular_glasses, shape)
             if choices.__contains__(3): # O
-                if speechbubbles == 0:
-                    image = overlay_image(image, pridebubble, shape)
-                    speechbubbles = 1
-                else:
-                    print("You already have a speech bubble. The speech bubbles will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, pridebubble, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, pridebubble, shape)
             if choices.__contains__(4): # V
-                if speechbubbles == 0:
-                    image = overlay_image(image, stembubble, shape)
-                    speechbubbles = 1
-                else:
-                    print("You already have a speech bubble. The speech bubbles will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, stembubble, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, stembubble, shape)
             if choices.__contains__(5): # E
-                if speechbubbles == 0:
-                    image = overlay_image(image, yesbubble, shape)
-                    speechbubbles = 1
-                else:
-                    print("You already have a speech bubble. The speech bubbles will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, yesbubble, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
-            if choices.__contains__(6):
-                if speechbubbles == 0:
-                    image = overlay_image(image, innovationbubble, shape)
-                    speechbubbles = 1
-                else:
-                    print("You already have a speech bubble. The speech bubbles will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, innovationbubble, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, yesbubble, shape)
+            if choices.__contains__(6): 
+                image = overlay_image(image, innovationbubble, shape)
             if choices.__contains__(7): # I
-                if speechbubbles == 0:
-                    image = overlay_image(image, staffpride, shape)
-                    speechbubbles = 1
-                else:
-                    print("You already have a speech bubble. The speech bubbles will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, staffpride, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, staffpride, shape)
             if choices.__contains__(8): # F
-                if speechbubbles == 0:
-                    image = overlay_image(image, proudofsst, shape)
-                    speechbubbles = 1
-                else:
-                    print("You already have a speech bubble. The speech bubbles will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, proudofsst, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
-            if choices.__contains__(9):
-                if speechbubbles == 0:
-                    image = overlay_image(image, redbluegrey, shape)
-                    speechbubbles = 1
-                else:
-                    print("You already have a speech bubble. The speech bubbles will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, redbluegrey, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, proudofsst, shape)
+            if choices.__contains__(9): 
+                image = overlay_image(image, redbluegrey, shape)
             if choices.__contains__(10): # E
-                image = overlay_image(image, celebrating, shape) #thought bubble
-
+                image = overlay_image(image, celebrating, shape)
             if choices.__contains__(11): # L
-                if hoodies == 0:
-                    image = overlay_image(image, sstinc, shape)
-                    hoodies = 1
-                else:
-                    print("You already have a hoodie. Multiple hoodies will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, sstinc, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, sstinc, shape)
             if choices.__contains__(12): # S
-                if hoodies == 0:
-                    image = overlay_image(image, sst_infineon, shape)
-                    hoodies = 1
-                else:
-                    print("You already have a hoodie. Multiple hoodies will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, sst_infineon, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, sst_infineon, shape)
             if choices.__contains__(13): # E
-                if hoodies == 0:
-                    image = overlay_image(image, sstsmu, shape)
-                    hoodies = 1
-                else:
-                    print("You already have a hoodie. Multiple hoodies will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, sstsmu, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, sstsmu, shape)
             if choices.__contains__(14):
-                if hoodies == 0:
-                    image = overlay_image(image, pforssst, shape)
-                    hoodies = 1
-                else:
-                    print("You already have a hoodie. Multiple hoodies will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, pforssst, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, pforssst, shape)
             if choices.__contains__(15): # statements
-                if hats == 0:
-                    image = overlay_image(image, top_hat, shape)
-                    hats = 1
-                else:
-                    print("You already have a hat. Multiple hats will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, top_hat, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, top_hat, shape)
             if choices.__contains__(16): # !!
-                if hats == 0:
-                    image = overlay_image(image, partyhat, shape)
-                    hats = 1
-                else:
-                    print("You already have a hat. Multiple hats will overlap. Are you sure you want to continue (y/n)?")
-                    while True:
-                        choice = input("> ").lower()
-                        if choice in ["y", "n", "yes", "no"]:
-                            if choice == "y" or choice == "yes":
-                                image = overlay_image(image, partyhat, shape)
-                                break
-                            else:
-                                break
-                        else:
-                            print("Invalid input, please enter y / n")
-
+                image = overlay_image(image, partyhat, shape)
             ''' #ugly green circles for landmarks on face
             for (x, y) in shape:
                 cv2.circle(image, (x, y), 2, (0, 255, 0), -1)
             '''
-
+        
         # show output
         cv2.imshow("Output", image)
-
+        
         k = cv2.waitKey(5) & 0xFF
         # if key press = ESC the program kills itself
         if k == 27:
